@@ -22,13 +22,13 @@ To start training your model on the cluster, you must first create a *training p
 
 ### Exporting a training package
 
-You can create a training job package in the SLEAP GUI fron the "Run Training.." dialog under the "Predict" menu:
+You can create a training job package in the `sleap-label` GUI by following the `Run Training...` option under the `Predict` menu:
 ![SLEAP GUI: Main Window Run Training](./docs/screenshots/01-main_dropdown_predict_run_training.png)
 
 Set the parameters for your training job (refer to [SLEAP documentation](https://sleap.ai/tutorials/initial-training.html) if you're not sure), and click `Export training job package` once you're done:
 ![SLEAP GUI: Run Training Dialog](./docs/screenshots/02-run_training_dialog.png)
 
-Next, you should see a dialog that says, "Created training job package." Click `Show Details...`:
+Next, you should see a dialog that says, `Created training job package.` Click `Show Details...`:
 ![SLEAP GUI: Created training job package](./docs/screenshots/03-created_training_job_package.png)
 
 The full file path to the training package will be displayed (e.g., `/home/me/sleap/my_training_job.zip`). Select and copy this path:
