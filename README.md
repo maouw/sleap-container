@@ -131,7 +131,7 @@ We are almost ready to launch the container. First, though, we need to allocate 
 The following command will allocate a job on one node with 4 GPUs, 64 GB of memory, and 8 CPUs for 24 hours on the `gpu-a40` partition available to the `escience` account. You can adjust these parameters as needed. For more information on the `salloc` command, see [this page](hhttps://uw-psych.github.io/compute_docs/hyak/compute/slurm/slurm.html) and the [salloc documentation](https://slurm.schedmd.com/salloc.html).
 
 ```bash
-salloc --job-name sleap-train-test \ 
+salloc --job-name sleap-train-test \
     --account escience \
     --partition gpu-a40 \
     --gpus 4 \
