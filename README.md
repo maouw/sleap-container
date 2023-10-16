@@ -8,7 +8,7 @@ s, which provide reproducible environments that can run anywhere and be shared w
 Before running this container, you'll need the following:
 
 - A Linux, macOS, or Windows machine
-- Abn SSH client (usually included with Linux and macOS, and available for Windows through the built-in SSH client on Windows 10+, [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) or [Cygwin](https://www.cs.odu.edu/~zeil/cs252/latest/Public/loggingin/cygwin.mmd.html)).
+- An SSH client (usually included with Linux and macOS, and available for Windows through the built-in SSH client on Windows 10+, [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) or [Cygwin](https://www.cs.odu.edu/~zeil/cs252/latest/Public/loggingin/cygwin.mmd.html)).
 - [Hyak](https://hyak.uw.edu) Klone access with compute resources
 
 Follow the instructions below to set up your machine correctly:
@@ -27,6 +27,25 @@ If you're on macOS, OpenSSH will already be installed. To open a terminal window
 
 On Windows 10+, you can [use the built-in SSH client](https://learn.microsoft.com/en-us/windows/terminal/tutorials/ssh). You may also install a SSH client through [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) or [Cygwin](https://www.cs.odu.edu/~zeil/cs252/latest/Public/loggingin/cygwin.mmd.html) (not recommended, needs additional setup). See the links for instructions on how to install these. You can start a terminal window by searching for "Terminal" in the Start menu.
 
+### Setting up SSH keys to connect to Hyak compute nodes
+
+Before you are allowed to connect to a compute node where your SLEAP job will be running, you must add your SSH public key to the authorized keys on the login node of the Hyak Klone cluster.
+
+If you don't, you will receive an error like this when you try to connect to the compute node:
+
+```text
+Permission denied (publickey,gssapi-keyex,gssapi-with-mic)
+```
+
+To set this up quickly on Linux, macOS, or Windows (WSL2/Cygwin), open a new terminal window **on your machine** and enter the following 2 commands before you try again. Replace `your-uw-netid` with your UW NetID:
+
+```bash
+[ ! -r ~/.ssh/id_rsa ] && ssh-keygen -t rsa -b 4096 -N '' -C "your-uw-netid@uw.edu" -f ~/.ssh/id_rsa
+ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "your-uw-netid"@klone.hyak.uw.edu
+```
+
+See the [Hyak documentation](https://hyak.uw.edu/docs/setup/intracluster-keys) for more information.
+
 ### Set up the Apptainer cache directory on Hyak `klone`
 
 Apptainer containers can take up several gigabytes of space each. By default, Apptainer will store cached containers in your home directory (`~`), under  `~/.cache/apptainer`. However, because home directory space on Hyak is limited to 10 GiB per user, you may want to set up a different cache directory.
@@ -37,7 +56,7 @@ We advise setting up a cache directory under the `/tmp` directory or in the [scr
 ssh your-uw-netid@klone.hyak.uw.edu # Replace your-uw-netid with your UW NetID
 ```
 
-Then, create a directory for the cache and set the `APPTAINER_CACHE_DIR` environment variable to point to it:
+Once you're logged in, create a directory for the cache and set the `APPTAINER_CACHE_DIR` environment variable to point to it:
 
 ```bash
 mkdir -p "/gscratch/scrubbed/$USER/apptainer-cache" && export APPTAINER_CACHE_DIR="/gscratch/scrubbed/$USER/apptainer-cache"
@@ -75,10 +94,10 @@ The full file path to the training package will be displayed (e.g., `/home/me/sl
 
 Now you must use the terminal on your computer to upload the training package to the Hyak cluster. You can find instructions on how to set up your terminal to access Hyak [here](https://uw-psych.github.io/compute_docs/hyak/start/connect-ssh.html).
 
-Open a terminal window and enter the following command to copy the training package to your home directory (`~`) on the cluster:
+Open a terminal window **on your computer** and enter the following command to copy the training package to your home directory (`~`) on the cluster:
 
 ```bash
-scp /home/me/sleap/my_training_job.zip klone.hyak.uw.edu:
+scp /home/me/sleap/my_training_job.zip your-uw-netid@klone.hyak.uw.edu: # Replace your-uw-netid with your UW NetID
 ```
 
 *NOTE: You may need to log in with your UW NetID and two-factor authentication.*
@@ -88,16 +107,15 @@ scp /home/me/sleap/my_training_job.zip klone.hyak.uw.edu:
 Once the file has been copied, log in to the cluster via SSH:
 
 ```bash
-ssh klone.hyak.uw.edu
+ssh your-uw-netid@klone.hyak.uw.edu # Replace your-uw-netid with your UW NetID
 ```
 
 #### Extracting the training package
 
-The training package should be located in your home directory. You can check by running `ls`:
+The training package should be located in your home directory on `klone`. You can check by running `ls`:
 
 ```bash
-ls *.zip
-# Should display all ZIP files in directory, including `my_training_job.zip`
+ls *.zip # Should display all ZIP files in directory, including `my_training_job.zip`
 ```
 
 Unzip the package file to a new directory. Let's call it `training_job`:
@@ -113,11 +131,18 @@ We are almost ready to launch the container. First, though, we need to allocate 
 The following command will allocate a job on one node with 4 GPUs, 64 GB of memory, and 8 CPUs for 24 hours on the `gpu-a40` partition available to the `escience` account. You can adjust these parameters as needed. For more information on the `salloc` command, see [this page](hhttps://uw-psych.github.io/compute_docs/hyak/compute/slurm/slurm.html) and the [salloc documentation](https://slurm.schedmd.com/salloc.html).
 
 ```bash
-salloc --job-name sleap-train-test --account escience --partition gpu-a40 --gpus 4 --ntasks 1
---gpus-per-task=4 --mem 64G --cpus-per-task 4 --time 24:00:00
+salloc --job-name sleap-train-test \ 
+    --account escience \
+    --partition gpu-a40 \
+    --gpus 4 \
+    --ntasks 1 \
+    --gpus-per-task=4 \
+    --mem 64G \
+    --cpus-per-task 4 \
+    --time 24:00:00
 ```
 
-When the allocation is ready, it will tell you what node it is running on, e.g.:
+When the allocation is ready, `salloc` will tell you what node it is running on, e.g.:
 
 ```text
 salloc: Granted job allocation 15001744
@@ -131,21 +156,23 @@ If you forget, you can run `squeue` to see the status of your job:
 
 ```bash
  squeue --me | grep sleap
- ```
+```
 
 This will show you the status of your job, including the node it is running on:
 
 ```text
-15001744   gpu-a40 sleap-tr    altan  R       5:26      1 g3052
+15001744   gpu-a40 sleap-tr    your-uw-netid  R       5:26      1 g3052
 ```
 
-#### Running SLEAP on the job node
+#### Running SLEAP on the compute node
 
 Now we are ready to start SLEAP. First, we need to connect to the node where our job is running. We do this with the `ssh` command to the node we noted earlier (in this example, `g3052`):
 
 ```bash
 ssh g3052
 ```
+
+If you have problems connecting to the node, it's possible that you haven't set up your SSH keys correctly. See the **Prerequisites** section or the [Hyak documentation](https://hyak.uw.edu/docs/setup/intracluster-keys) for more information.
 
 ##### Verifying GPU access
 
@@ -189,13 +216,12 @@ cd ~/training_job
 The next step is to launch the container:
 
 ```bash
-apptainer run --nv ~/sleap.sif bash train-script.sh
+apptainer run --nv docker://ghcr.io/maouw/sleap-container:latest bash train-script.sh
 ```
 
-We are launching the container by instructing `apptainer` to launch the container
-at `~/sleap.sif` with the option `--nv` to enable Nvidia GPU support. Once the container has launched, it will instruct `bash` to run the script `train-script.sh`. This script will start the training job.
+Apptainer will download the container image from GitHub and launch it on the node. The option `--nv` enables Nvidia GPU support. Once the container has launched, it will instruct `bash` to run the script `train-script.sh`. This script will start the training job.
 
-Once the job has started, you will see a lot of output in the terminal. After some time, if training is successful, the last of the output should look something similar to this:
+During training, you will see a lot of output in the terminal. After some time, if training is successful, the last of the output should look something similar to this:
 
 ```text
 INFO:sleap.nn.evals:Saved predictions: models/231009_165437.centered_instance/labels_pr.train.slp
@@ -211,7 +237,7 @@ INFO:sleap.nn.evals:OKS mAP: 0.064026
 Once training finishes, you'll see a new directory (or two new directories for top-down training pipeline) containing all the model files SLEAP needs to use for inference:
 
 ```bash
-ls models
+ls models/
 ```
 
 ```text
@@ -222,17 +248,17 @@ You can use these model files to run inference on your own computer, or you can 
 
 ### Downloading the model
 
-To copy the model files back to your computer, compress the model directory with `zip`:
+To copy the model files back to your computer, in a terminal where you are logged into `klone.hyak.uw.edu`, compress the model directory with `zip`:
 
 ```bash
 cd ~/training_job
 zip -r trained_models.zip models
 ```
 
-Then, in a new terminal window *on your own computer*, use the `scp` command to copy the model files back to your computer:
+Then, in a new terminal window *on your own computer*, use the `scp` command to copy the model files from `klone` to your computer:
 
 ```bash
-scp klone.hyak.uw.edu:~/training_job/trained_models.zip .
+scp your-uw-netid@klone.hyak.uw.edu:~/training_job/trained_models.zip . # Replace your-uw-netid with your UW NetID
 ```
 
 This will copy the file `trained_models.zip` to your current directory. You can then unzip the file and use the model files for inference on your own computer. Consult the [SLEAP documentation](https://sleap.ai/guides/remote.html) for more information on running inference with a trained model.
@@ -243,7 +269,7 @@ This will copy the file `trained_models.zip` to your current directory. You can 
 
 To do this, go back to the terminal where you were running SLEAP on the cluster. (If you closed the terminal, you can log back in to the cluster with `ssh klone.hyak.uw.edu`.)
 
-**If you're still logged in to the job node**, exit:
+**If you're still logged in to the compute node**, exit:
 
 ```bash
 exit
