@@ -179,7 +179,7 @@ If you have problems connecting to the node, it's possible that you haven't set 
 Once you are connected to the node, you can verify that the SLEAP container has access to the GPUs by running the following command:
 
 ```bash
-apptainer run --nv docker://ghcr.io/maouw/sleap-container:latest python -c "import sleap; sleap.system_summary()"
+apptainer run --nv oras://ghcr.io/maouw/sleap-container:latest python -c "import sleap; sleap.system_summary()"
 ```
 
 You should get output that looks something like this:
@@ -216,7 +216,7 @@ cd ~/training_job
 The next step is to launch the container:
 
 ```bash
-apptainer run --nv docker://ghcr.io/maouw/sleap-container:latest bash train-script.sh
+apptainer run --nv oras://ghcr.io/maouw/sleap-container:latest bash train-script.sh
 ```
 
 Apptainer will download the container image from GitHub and launch it on the node. The option `--nv` enables Nvidia GPU support. Once the container has launched, it will instruct `bash` to run the script `train-script.sh`. This script will start the training job.
