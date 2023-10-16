@@ -1,20 +1,57 @@
 # sleap-container
 
-Container for SLEAP
+This a [container](https://apptainer.org/) to run [SLEAP](https://sleap.ai) jobs on the University of Washington [Hyak](https://hyak.uw.edu) cluster. You can use this container to run SLEAP training and prediction jobs on Hyak in a GPU-accelerated environment.
+s, which provide reproducible environments that can run anywhere and be shared with other researchers.
 
-## Build instructions
+## Prerequisites
 
-Make the container with `make`:
+Before running this container, you'll need the following:
+
+- A Linux, macOS, or Windows machine
+- Abn SSH client (usually included with Linux and macOS, and available for Windows through the built-in SSH client on Windows 10+, [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) or [Cygwin](https://www.cs.odu.edu/~zeil/cs252/latest/Public/loggingin/cygwin.mmd.html)).
+- [Hyak](https://hyak.uw.edu) Klone access with compute resources
+
+Follow the instructions below to set up your machine correctly:
+
+### Installing SSH
+
+#### Linux
+
+If you are using Linux, OpenSSH is probably installed already -- if not, you can install it via `apt-get install openssh-client` on Debian/Ubuntu or `yum install openssh-clients` on RHEL/CentOS/Rocky/Fedora. To open a terminal window, search for "Terminal" in your desktop environment's application launcher.
+
+#### macOS
+
+If you're on macOS, OpenSSH will already be installed. To open a terminal window, open `/Applications/Utilities/Terminal.app` or search for "Terminal" in Launchpad or Spotlight.
+
+#### Windows
+
+On Windows 10+, you can [use the built-in SSH client](https://learn.microsoft.com/en-us/windows/terminal/tutorials/ssh). You may also install a SSH client through [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) or [Cygwin](https://www.cs.odu.edu/~zeil/cs252/latest/Public/loggingin/cygwin.mmd.html) (not recommended, needs additional setup). See the links for instructions on how to install these. You can start a terminal window by searching for "Terminal" in the Start menu.
+
+### Set up the Apptainer cache directory on Hyak `klone`
+
+Apptainer containers can take up several gigabytes of space each. By default, Apptainer will store cached containers in your home directory (`~`), under  `~/.cache/apptainer`. However, because home directory space on Hyak is limited to 10 GiB per user, you may want to set up a different cache directory.
+
+We advise setting up a cache directory under the `/tmp` directory or in the [scrubbed](https://hyak.uw.edu/docs/storage/gscratch/) directory, under `/gscratch/scrubbed/your-uw-netid`. To set this up, first connect to `klone.hyak.uw.edu` via SSH:
 
 ```bash
-make container
+ssh your-uw-netid@klone.hyak.uw.edu # Replace your-uw-netid with your UW NetID
 ```
 
-This will create a container called `sleap.sif` in the `containers` directory.
+Then, create a directory for the cache and set the `APPTAINER_CACHE_DIR` environment variable to point to it:
+
+```bash
+mkdir -p "/gscratch/scrubbed/$USER/apptainer-cache" && export APPTAINER_CACHE_DIR="/gscratch/scrubbed/$USER/apptainer-cache"
+```
+
+Finally, add the following line to your `~/.bashrc` file (or `~/.zshrc` if you use ZSH) to retain this setting across multiple logins:
+
+```bash
+echo "export APPTAINER_CACHE_DIR=\"/gscratch/scrubbed/$USER/apptainer-cache\"" >> ~/.bashrc
+```
 
 ## Usage
 
- This guide assumes that you are running SLEAP on your own machine, with an open SLEAP project that you are ready to start training on. If you need help creating a SLEAP project, consult the [SLEAP documentation](https://sleap.ai/tutorials/tutorial.html).
+This guide assumes that you are running SLEAP on your own machine, with an open SLEAP project that you are ready to start training on. If you need help creating a SLEAP project, consult the [SLEAP documentation](https://sleap.ai/tutorials/tutorial.html).
 
 To start training your model on the cluster, you must first create a *training package*:
 
