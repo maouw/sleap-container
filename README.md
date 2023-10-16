@@ -179,7 +179,7 @@ If you have problems connecting to the node, it's possible that you haven't set 
 Once you are connected to the node, you can verify that the SLEAP container has access to the GPUs by running the following command:
 
 ```bash
-apptainer run --nv ~/sleap.sif python -c "import sleap; sleap.system_summary()"
+apptainer run --nv docker://ghcr.io/maouw/sleap-container:latest python -c "import sleap; sleap.system_summary()"
 ```
 
 You should get output that looks something like this:
