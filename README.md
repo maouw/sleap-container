@@ -41,7 +41,7 @@ To set this up quickly on Linux, macOS, or Windows (WSL2/Cygwin), open a new ter
 
 ```bash
 [ ! -r ~/.ssh/id_rsa ] && ssh-keygen -t rsa -b 4096 -N '' -C "your-uw-netid@uw.edu" -f ~/.ssh/id_rsa
-ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "your-uw-netid"@klone.hyak.uw.edu
+ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa your-uw-netid@klone.hyak.uw.edu
 ```
 
 See the [Hyak documentation](https://hyak.uw.edu/docs/setup/intracluster-keys) for more information.
