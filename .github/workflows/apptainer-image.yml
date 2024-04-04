@@ -1,6 +1,14 @@
 name: Apptainer Build
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+  workflow_dispath:
+    inputs:
+      IMAGE_TAG:
+        description: 'Tag of the image to build'
+        default: 'latest'
+        required: false
 
 defaults:
   run:
