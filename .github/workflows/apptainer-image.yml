@@ -1,30 +1,42 @@
-name: Singularity Build
+name: Apptainer Build
 on:
-  push:
-    tags:
-      - release-*
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  APPTAINER_VERSION: 1.2.5
+  ORAS_VERSION: 1.1.0
 
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
     name: Build Apptainer image
     permissions:
-        contents: read
-        packages: write
+      contents: write
+      packages: write
     steps:
+      - name: Clear up space
+        uses: easimon/maximize-build-space@master
+        with:
+            remove-dotnet: 'true'
+            remove-android: 'true'
+            remove-haskell: 'true'
+            remove-codeql: 'true'
+            remove-docker-images: 'true'
       - name: Install Apptainer
-        run: deb=$(curl -w "%{filename_effective}" -LO https://github.com/apptainer/apptainer/releases/download/v1.2.4/apptainer_1.2.4_amd64.deb) && sudo apt install -y "./$deb"; rm -f "$deb"; unset deb
+        with:
+          apptainer-version: '1.2.5'
+        uses: uw-psych/apptainer-actions/setup@main
       - name: Check out code for the container build
         uses: actions/checkout@v4
-      - name: Build Container
-        run: |
-          apptainer build container.sif Singularity
-          tag=$(echo "${recipe/Singularity\./}")
-          [ "$tag" == "Singularity" ] && tag=latest
-          # Build the container and name by tag
-          echo "Tag is $tag."
-          echo "tag=$tag" >> $GITHUB_ENV
-      - name: Login and Deploy Container
-        run: |
-          apptainer remote login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} oras://ghcr.io
-          apptainer push container.sif oras://ghcr.io/${{ github.repository }}:${tag}
+      - name: Build and push Apptainer image
+        uses: uw-psych/apptainer-actions/build-and-push@main
+        with:
+          deffile: Singularity
+          xtrace: 'true'
+          apptainer-tmpdir: ${{ github.workspace }}/apptainer-tmp
+          image-dir: ${{ github.workspace }}
+
