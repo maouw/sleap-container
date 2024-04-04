@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispath:
+  workflow_dispatch:
     inputs:
       IMAGE_TAG:
         description: 'Tag of the image to build'
