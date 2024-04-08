@@ -56,16 +56,16 @@ We advise setting up a cache directory under the `/tmp` directory or in the [scr
 ssh your-uw-netid@klone.hyak.uw.edu # Replace your-uw-netid with your UW NetID
 ```
 
-Once you're logged in, create a directory for the cache and set the `APPTAINER_CACHE_DIR` environment variable to point to it:
+Once you're logged in, create a directory for the cache and set the `APPTAINER_CACHEDIR` environment variable to point to it:
 
 ```bash
-mkdir -p "/gscratch/scrubbed/$USER/apptainer-cache" && export APPTAINER_CACHE_DIR="/gscratch/scrubbed/$USER/apptainer-cache"
+mkdir -p "/gscratch/scrubbed/$USER/apptainer-cache" && export APPTAINER_CACHEDIR="/gscratch/scrubbed/$USER/apptainer-cache"
 ```
 
 Finally, add the following line to your `~/.bashrc` file (or `~/.zshrc` if you use ZSH) to retain this setting across multiple logins:
 
 ```bash
-echo "export APPTAINER_CACHE_DIR=\"/gscratch/scrubbed/$USER/apptainer-cache\"" >> ~/.bashrc
+echo "export APPTAINER_CACHEDIR=\"/gscratch/scrubbed/$USER/apptainer-cache\"" >> ~/.bashrc
 ```
 
 ## Usage
