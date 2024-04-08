@@ -142,37 +142,9 @@ salloc --job-name sleap-train-test \
     --time 24:00:00
 ```
 
-When the allocation is ready, `salloc` will tell you what node it is running on, e.g.:
+When the allocation is ready, you will automatically connect to the compute node. When you exit this session, the allocation will automatically be released.
 
-```text
-salloc: Granted job allocation 15001744
-salloc: Waiting for resource configuration
-salloc: Nodes g3052 are ready for job
-```
-
-Take note of the node, in this case `g3052`. We will need it in the next step.
-
-If you forget, you can run `squeue` to see the status of your job:
-
-```bash
- squeue --me | grep sleap
-```
-
-This will show you the status of your job, including the node it is running on:
-
-```text
-15001744   gpu-a40 sleap-tr    your-uw-netid  R       5:26      1 g3052
-```
-
-#### Running SLEAP on the compute node
-
-Now we are ready to start SLEAP. First, we need to connect to the node where our job is running. We do this with the `ssh` command to the node we noted earlier (in this example, `g3052`):
-
-```bash
-ssh g3052
-```
-
-If you have problems connecting to the node, it's possible that you haven't set up your SSH keys correctly. See the **Prerequisites** section or the [Hyak documentation](https://hyak.uw.edu/docs/setup/intracluster-keys) for more information.
+#### Running SLEAP
 
 ##### Verifying GPU access
 
