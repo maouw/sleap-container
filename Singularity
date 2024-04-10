@@ -2,7 +2,7 @@ Bootstrap: docker
 From: mambaorg/micromamba:{{ MICROMAMBA_TAG }}
 
 %arguments
-	MICROMAMBA_TAG=jammy
+	MICROMAMBA_TAG=jammy-cuda-12.3.1
 	SLEAP_VERSION=1.3.3
 
 %environment
