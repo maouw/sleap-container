@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
+#SBATCH --nodes=1
+#SBATCH --job-name=sleap-train
+# This is a SLURM job script for running the ipip_bootstats tutorial with
+#	Apptainer. It is intended to be run on the Klone cluster at the University
+#	of Washington.
+
+# APPTAINER SETUP:
+#	The parameters to apptainer are specified by environment variables.
+#	The commands below will use the default values specified below unless
+#	these environment variables are already set. (this is what the :- means)
+#		APPTAINER_IMAGE_PATH:
+#			The path to the apptainer image to use
+APPTAINER_IMAGE_PATH="/gscratch/scrubbed/${USER}/sleap/maouw--sleap-container_latest.sif"
+IMAGE_SOURCE="oras://ghcr.io/maouw/sleap-container/sleap-container:0.9.2"
+WORKING_DIR="/gscratch/scrubbed/${USER}/sleap/tutorial"
+
+# COMMANDS:
+# Load the latest version of apptainer:
+module load apptainer/local
+
+#  Make directories:
+
+mkdir -p "$(dirname "${APPTAINER_IMAGE_PATH}")"
+mkdir -p "${WORKING_DIR}"
+
+export APPTAINER_TMPDIR="${APPTAINER_TMPDIR:-/gscratch/scrubbed/${USER}/apptainer-tmp}"
+mkdir -p "${APPTAINER_TMPDIR}"
+
+# If the image doesn't exist, build it:
+if ! [[ -f "${APPTAINER_IMAGE_PATH:-}" ]]; then
+	apptainer pull \
+		"${APPTAINER_IMAGE_PATH}" \
+		"${IMAGE_SOURCE}"
+fi
+
+# Append the /gscratch directory Apptainer's bind path so that we can access it:
+export APPTAINER_BINDPATH="${APPTAINER_BINDPATH:+${APPTAINER_BINDPATH}:}/gscratch"
+
+# Set writable tmpfs
+export APPTAINER_WRITABLE_TMPFS=1
+
+# Set GPU
+export APPTAINER_NV=1
+
+# Set the output file to be the job name with the array index (if applicable):
+export SRUN_OUTPUT="${WORKING_DIR}/${SLURM_JOB_NAME:-job}.log"
+
+# Run the script, passing along any arguments:
+apptainer run "${APPTAINER_IMAGE_PATH}" baseline.centroid.json "${WORKING_DIR}/dataset/drosophila-melanogaster-courtship/courtship_labels.slp" --run_name "courtship.centroid" --video-paths "${WORKING_DIR}/dataset/drosophila-melanogaster-courtship/20190128_113421.mp4"
+
