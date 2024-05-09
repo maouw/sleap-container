@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=sleap-train
+#SBATCH --output=sleap-train.log
+#SBATCH --time=2:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --gpus=1
+
+# This is a SLURM job script for running a sleap training job with
+#	Apptainer. It is intended to be run on the Klone cluster at the University
+#	of Washington.
+
+# COMMANDS:
+
+# Set where we are working:
+export WORKDIR="/gscratch/scrubbed/${USER}/sleap"
+
+# Create the base directory for the image:
+mkdir -p "${WORKDIR}"
+
+# Go there:
+cd "${WORKDIR}"
+
+# Set path to the sleap Apptainer image:
+SLEAP_SIF="${WORKDIR}/sleap-container.sif"
+
+# Load the latest version of apptainer:
+module load apptainer/local
+
+# Set the Apptainer cache dir if not set:
+export APPTAINER_CACHEDIR="${APPTAINER_CACHEDIR:-/gscratch/scrubbed/${USER}/.cache/apptainer}"
+mkdir -p "${APPTAINER_CACHEDIR}"
+
+# If the image doesn't exist, download it:
+apptainer pull "${SLEAP_SIF}" oras://ghcr.io/maouw/sleap-container/sleap-container:0.9.2 2>/dev/null || true
+
+# Quit on error:
+set -e
+
+# Set other Apptainer options:
+export APPTAINER_CLEANENV=1 APPTAINER_NV=1 APPTAINER_WRITABLE_TMPFS=1 APPTAINER_BIND=/gscratch
+
+# Run predictions:
+apptainer run $SLEAP sleap-track "dataset/drosophila-melanogaster-courtship/20190128_113421.mp4" --frames 0-100 -m "models/courtship.centroid" -m "models/courtship.topdown_confmaps"
+
+echo "Inference output is ready at ${WORKDIR}/dataset/drosophila-melanogaster-courtship"
+find dataset/drosophila-melanogaster-courtship
+
