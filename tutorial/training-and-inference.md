@@ -60,16 +60,6 @@ You can inspect your predictions file using `sleap-inspect`
 srun apptainer run $SLEAP sleap-inspect dataset/drosophila-melanogaster-courtship/20190128_113421.mp4.predictions.slp
 ```
 
-`
-
-```
-# Make it easier to generate command to download/upload files:
-getDownloadCommand() { echo "scp -rp $USER@klone.hyak.uw.edu:\"$(pwd)/$1\" ."; }
-getUploadCommand() { echo "scp -rp \"$1\" $USER@klone.hyak.uw.edu:\"${2:-}\""; }
-```
-
-
-
 ## Job script
 
 ```bash
