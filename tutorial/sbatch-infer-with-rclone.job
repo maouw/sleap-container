@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 # This is a SLURM job script for running a sleap inference job with Apptainer on the Klone cluster at the University of Washington with an SMB share mounted using rclone.
+#
+# You need to have:
+#  - A file in your home directory called '.smbpasswd' that contains the password for the SMB share.
+#  - A list of input videos in a file called 'inputs.txt' in the root directory of the SMB share.
+# to run this script, with one video path per line.
+#
+# To invoke the script, run, e.g.:
+#     sbatch --account escience --partition gpu-a40 --array=1-4 sbatch-infer-with-rclone.job
+# Where:
+#   --account escience: The account to charge the job to.
+#   --partition gpu-a40: The partition to run the job on.
+#   --array=1-4: The array of tasks to run, set to 1-N where N is the number of input videos you have in 'inputs.txt'.
+#
+# = SLURM Job Configuration =
 # Set the job name:
 #SBATCH --job-name=sleap-train
 # Enable email notifications when the job starts, ends, or fails:
@@ -7,7 +21,7 @@
 #SBATCH --mail-user=%u@uw.edu
 # Set a maximum time for the job to run of 24 hours:
 #SBATCH --time=24:00:00
-# Set the number of tasks to run on the node to 1:
+# Set the number of tasks to 1:
 #SBATCH --ntasks=1
 # Set the number of CPU cores to 1:
 #SBATCH --cpus-per-task=1

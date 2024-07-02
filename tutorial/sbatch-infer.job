@@ -43,7 +43,7 @@ set -e
 export APPTAINER_CLEANENV=1 APPTAINER_NV=1 APPTAINER_WRITABLE_TMPFS=1 APPTAINER_BIND=/gscratch
 
 # Run predictions:
-apptainer run $SLEAP sleap-track "dataset/drosophila-melanogaster-courtship/20190128_113421.mp4" --frames 0-100 -m "models/courtship.centroid" -m "models/courtship.topdown_confmaps"
+apptainer run "${SLEAP_SIF}" sleap-track "dataset/drosophila-melanogaster-courtship/20190128_113421.mp4" --frames 0-100 -m "models/courtship.centroid" -m "models/courtship.topdown_confmaps"
 
 echo "Inference output is ready at ${WORKDIR}/dataset/drosophila-melanogaster-courtship"
 find dataset/drosophila-melanogaster-courtship
